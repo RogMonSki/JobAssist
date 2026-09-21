@@ -10,8 +10,13 @@ app.use(cors())
 app.use(express.json())
 
 app.get('/api/health', async (req, res) => {
-    const result = await pool.query('SELECT NOW()')
-    res.json({ status: 'ok', dbTime: result.rows[0].now })
+    try {
+      const result = await pool.query('SELECT NOW()')
+      res.json({ status: 'ok', dbTime: result.rows[0].now })
+    } catch (err) {
+      console.error(err)
+      res.status(500).json({ status: 'error', message: 'Database unavailable' })
+    }
 })
 
 const PORT = process.env.PORT || 3001
