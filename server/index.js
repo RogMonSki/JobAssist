@@ -1,23 +1,17 @@
 const express = require('express')
 const cors = require('cors')
-require('dotenv').config()
-const { Pool } = require('pg')
+const cookieParser = require('cookie-parser')
+const config = require('./config')
+const healthRouter = require('./routes/health')
+const authRouter = require('./routes/auth')
 
 const app = express()
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 app.use(cors())
 app.use(express.json())
+app.use(cookieParser())
 
-app.get('/api/health', async (req, res) => {
-    try {
-      const result = await pool.query('SELECT NOW()')
-      res.json({ status: 'ok', dbTime: result.rows[0].now })
-    } catch (err) {
-      console.error(err)
-      res.status(500).json({ status: 'error', message: 'Database unavailable' })
-    }
-})
+app.use('/api', healthRouter)
+app.use('/api/auth', authRouter)
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+app.listen(config.port, () => console.log(`Server running on port ${config.port}`))

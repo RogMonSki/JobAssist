@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import FeatureCard from '../components/FeatureCard.jsx'
 import Footer from '../components/Footer.jsx'
+import { useAuth } from '../context/useAuth.js'
 
 const features = [
   {
@@ -31,6 +32,8 @@ const features = [
 ]
 
 function Home() {
+  const { user } = useAuth()
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -44,11 +47,11 @@ function Home() {
             Track applications, extract skills from job descriptions with AI,
             and see exactly what your CV is missing.
           </p>
-          <Link 
-            to="/login" 
+          <Link
+            to={user ? '/dashboard' : '/login'}
             className="mt-10 inline-block rounded-full bg-white px-8 py-4 text-lg font-semibold text-teal-700 shadow-lg hover:bg-cyan-50"
           >
-            Get Started
+            {user ? 'Go to dashboard' : 'Get Started'}
           </Link>
         </section>
 

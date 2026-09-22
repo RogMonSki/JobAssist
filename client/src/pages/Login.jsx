@@ -1,13 +1,29 @@
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
+import { useAuth } from '../context/useAuth.js'
 
 function Login() {
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(event) {
+  const { login } = useAuth()
+  const navigate = useNavigate()
+
+  async function handleSubmit(event) {
     event.preventDefault()
-    // Auth isn't built yet, so submitting deliberately does nothing.
+    setError(null)
+    setSubmitting(true)
+    try {
+      await login(identifier, password)
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -24,19 +40,23 @@ function Login() {
             Welcome back. Enter your details to continue.
           </p>
 
+          {error && (
+            <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+          )}
+
           <label
-            htmlFor="email"
+            htmlFor="identifier"
             className="mt-6 block text-sm font-medium text-slate-700"
           >
-            Email
+            Email or username
           </label>
           <input
-            id="email"
-            type="email"
-            autoComplete="email"
+            id="identifier"
+            type="text"
+            autoComplete="username"
             required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            value={identifier}
+            onChange={(event) => setIdentifier(event.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
           />
 
@@ -58,10 +78,18 @@ function Login() {
 
           <button
             type="submit"
-            className="mt-6 w-full rounded-lg bg-linear-to-br from-cyan-500 to-teal-600 px-4 py-2.5 font-semibold text-white hover:opacity-90"
+            disabled={submitting}
+            className="mt-6 w-full rounded-lg bg-linear-to-br from-cyan-500 to-teal-600 px-4 py-2.5 font-semibold text-white hover:opacity-90 disabled:opacity-60"
           >
-            Log in
+            {submitting ? 'Logging in...' : 'Log in'}
           </button>
+
+          <p className="mt-4 text-center text-sm text-slate-500">
+            Don't have an account?{' '}
+            <Link to="/signup" className="font-medium text-cyan-600 hover:underline">
+              Sign up
+            </Link>
+          </p>
         </form>
       </main>
     </div>

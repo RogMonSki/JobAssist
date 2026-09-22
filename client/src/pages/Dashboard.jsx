@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar.jsx'
+import { useAuth } from '../context/useAuth.js'
 
 function Dashboard() {
+  const { user } = useAuth()
   const [health, setHealth] = useState(null)
   const [error, setError] = useState(null)
 
@@ -22,7 +24,9 @@ function Dashboard() {
       <Navbar />
       
       <div className="p-8">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">
+          {user ? `Hi, ${user.firstName}` : 'Dashboard'}
+        </h1>
         {error ? (
           <p className="mt-4 text-red-600">Error: {error}</p>
         ) : health ? (
