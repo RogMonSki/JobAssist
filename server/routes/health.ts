@@ -1,11 +1,11 @@
-const express = require('express')
-const pool = require('../db')
+import express from 'express'
+import pool from '../db.js'
 
 const router = express.Router()
 
 router.get('/health', async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW()')
+    const result = await pool.query<{ now: Date }>('SELECT NOW()')
     res.json({ status: 'ok', dbTime: result.rows[0].now })
   } catch (err) {
     console.error(err)
@@ -13,4 +13,4 @@ router.get('/health', async (req, res) => {
   }
 })
 
-module.exports = router
+export default router

@@ -1,8 +1,8 @@
-const { execFileSync } = require('child_process')
-const path = require('path')
-const config = require('../config')
+import { execFileSync } from 'node:child_process'
+import path from 'node:path'
+import config from '../config.js'
 
-const outFile = path.join(__dirname, '..', 'schema.sql')
+const outFile = path.join(import.meta.dirname, '..', 'schema.sql')
 
 execFileSync(
   'pg_dump',

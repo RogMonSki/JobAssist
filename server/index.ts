@@ -1,9 +1,9 @@
-const express = require('express')
-const cors = require('cors')
-const cookieParser = require('cookie-parser')
-const config = require('./config')
-const healthRouter = require('./routes/health')
-const authRouter = require('./routes/auth')
+import express from 'express'
+import cors from 'cors'
+import cookieParser from 'cookie-parser'
+import config from './config.js'
+import healthRouter from './routes/health.js'
+import authRouter from './routes/auth.js'
 
 const app = express()
 

@@ -1,5 +1,5 @@
-const bcrypt = require('bcrypt')
-const pool = require('../db')
+import bcrypt from 'bcrypt'
+import pool from '../db.js'
 
 const TEST_USER = {
   email: 'test@example.com',
@@ -12,7 +12,7 @@ const TEST_USER = {
 async function seed() {
   const passwordHash = await bcrypt.hash(TEST_USER.password, 12)
 
-  const result = await pool.query(
+  const result = await pool.query<{ id: number }>(
     `INSERT INTO users (email, username, first_name, last_name, password_hash)
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT ((LOWER(email))) DO NOTHING

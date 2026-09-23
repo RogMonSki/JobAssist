@@ -1,10 +1,12 @@
-const express = require('express')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const rateLimit = require('express-rate-limit')
-const pool = require('../db')
-const config = require('../config')
-const requireAuth = require('../middleware/requireAuth')
+import express from 'express'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import rateLimit from 'express-rate-limit'
+import { DatabaseError } from 'pg'
+import type { Response } from 'express'
+import pool from '../db.js'
+import config from '../config.js'
+import requireAuth from '../middleware/requireAuth.js'
 
 const router = express.Router()
 
@@ -18,11 +20,28 @@ const authLimiter = rateLimit({
 
 const USERNAME_PATTERN = /^[A-Za-z0-9_]{3,30}$/
 
-function signToken(userId) {
+interface UserRow {
+  id: number
+  email: string
+  username: string
+  first_name: string
+  last_name: string
+  password_hash: string
+}
+
+interface PublicUser {
+  id: number
+  email: string
+  username: string
+  firstName: string
+  lastName: string
+}
+
+function signToken(userId: number): string {
   return jwt.sign({ userId }, config.jwtSecret, { expiresIn: '7d' })
 }
 
-function setAuthCookie(res, token) {
+function setAuthCookie(res: Response, token: string): void {
   res.cookie('token', token, {
     httpOnly: true,
     sameSite: 'lax',
@@ -31,7 +50,7 @@ function setAuthCookie(res, token) {
   })
 }
 
-function toPublicUser(row) {
+function toPublicUser(row: UserRow): PublicUser {
   return {
     id: row.id,
     email: row.email,
@@ -65,7 +84,7 @@ router.post('/signup', authLimiter, async (req, res) => {
   try {
     const passwordHash = await bcrypt.hash(password, BCRYPT_COST)
 
-    const result = await pool.query(
+    const result = await pool.query<UserRow>(
       `INSERT INTO users (email, username, first_name, last_name, password_hash)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, email, username, first_name, last_name`,
@@ -76,7 +95,7 @@ router.post('/signup', authLimiter, async (req, res) => {
     setAuthCookie(res, signToken(user.id))
     res.status(201).json(toPublicUser(user))
   } catch (err) {
-    if (err.code === '23505') {
+    if (err instanceof DatabaseError && err.code === '23505') {
       if (err.constraint === 'users_email_lower_idx') {
         return res.status(409).json({ message: 'That email is already registered' })
       }
@@ -98,7 +117,7 @@ router.post('/login', authLimiter, async (req, res) => {
   }
 
   try {
-    const result = await pool.query(
+    const result = await pool.query<UserRow>(
       `SELECT id, email, username, first_name, last_name, password_hash
        FROM users
        WHERE LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1)`,
@@ -131,7 +150,7 @@ router.post('/logout', (req, res) => {
 
 router.get('/me', requireAuth, async (req, res) => {
   try {
-    const result = await pool.query(
+    const result = await pool.query<UserRow>(
       'SELECT id, email, username, first_name, last_name FROM users WHERE id = $1',
       [req.userId]
     )
@@ -146,4 +165,4 @@ router.get('/me', requireAuth, async (req, res) => {
   }
 })
 
-module.exports = router
+export default router
