@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
-import Navbar from '../components/Navbar.jsx'
-import FeatureCard from '../components/FeatureCard.jsx'
-import Footer from '../components/Footer.jsx'
-import { useAuth } from '../context/useAuth.js'
+import Navbar from '../components/Navbar'
+import FeatureCard from '../components/FeatureCard'
+import Footer from '../components/Footer'
+import { useAuth } from '../context/useAuth'
 
 const features = [
   {

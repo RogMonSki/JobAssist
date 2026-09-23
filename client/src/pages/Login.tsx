@@ -1,18 +1,18 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar.jsx'
-import { useAuth } from '../context/useAuth.js'
+import Navbar from '../components/Navbar'
+import { useAuth } from '../context/useAuth'
 
 function Login() {
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
     setSubmitting(true)
@@ -20,7 +20,7 @@ function Login() {
       await login(identifier, password)
       navigate('/dashboard')
     } catch (err) {
-      setError(err.message)
+      setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setSubmitting(false)
     }

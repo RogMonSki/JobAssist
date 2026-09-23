@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react'
-import Navbar from '../components/Navbar.jsx'
-import { useAuth } from '../context/useAuth.js'
+import Navbar from '../components/Navbar'
+import { useAuth } from '../context/useAuth'
+
+interface HealthResponse {
+  status: string
+  dbTime: string
+}
 
 function Dashboard() {
   const { user } = useAuth()
-  const [health, setHealth] = useState(null)
-  const [error, setError] = useState(null)
+  const [health, setHealth] = useState<HealthResponse | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/health')
@@ -13,16 +18,18 @@ function Dashboard() {
         if (!res.ok) {
           throw new Error(`Backend responded with status ${res.status}`)
         }
-        return res.json()
+        return res.json() as Promise<HealthResponse>
       })
       .then(setHealth)
-      .catch((err) => setError(err.message))
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : 'Something went wrong')
+      })
   }, [])
 
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      
+
       <div className="p-8">
         <h1 className="text-3xl font-bold">
           {user ? `Hi, ${user.firstName}` : 'Dashboard'}

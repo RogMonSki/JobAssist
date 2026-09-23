@@ -1,4 +1,10 @@
-function FeatureCard({ icon, title, description }) {
+interface FeatureCardProps {
+  icon: string
+  title: string
+  description: string
+}
+
+function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="text-3xl">{icon}</div>
