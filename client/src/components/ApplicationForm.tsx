@@ -58,6 +58,12 @@ function ApplicationForm({ initial, onSaved }: ApplicationFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
+      {!initial && (
+        <p className="mb-4 rounded-lg bg-cyan-50 px-3 py-2 text-sm text-cyan-700">
+          You can add the job description afterward.
+        </p>
+      )}
+
       {error && (
         <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
       )}

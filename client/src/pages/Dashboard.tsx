@@ -72,53 +72,57 @@ function Dashboard() {
           <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
         )}
 
-        {loading ? (
-          <p className="mt-6 text-slate-500">Loading applications...</p>
-        ) : error ? null : applications.length === 0 ? (
-          <p className="mt-6 text-slate-500">
-            No applications yet. Add your first one to get started.
-          </p>
-        ) : (
-          <table className="mt-6 w-full border-collapse text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 text-slate-500">
-                <th className="py-2 pr-4 font-medium">Title</th>
-                <th className="py-2 pr-4 font-medium">Company</th>
-                <th className="py-2 pr-4 font-medium">Status</th>
-                <th className="py-2 pr-4 font-medium">Applied on</th>
-                <th className="py-2 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.map((application) => (
-                <tr key={application.id} className="border-b border-slate-100">
-                  <td className="py-3 pr-4">{application.title}</td>
-                  <td className="py-3 pr-4">{application.company}</td>
-                  <td className="py-3 pr-4">
-                    <StatusSelect application={application} onChange={handleStatusChange} />
-                  </td>
-                  <td className="py-3 pr-4">{application.appliedOn ?? '—'}</td>
-                  <td className="py-3">
-                    <button
-                      type="button"
-                      onClick={() => setEditing(application)}
-                      className="mr-3 font-medium text-cyan-600 hover:underline"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(application)}
-                      className="font-medium text-red-600 hover:underline"
-                    >
-                      Delete
-                    </button>
-                  </td>
+        <div className="mt-6 rounded-xl bg-linear-to-br from-cyan-500 to-teal-600 p-6 text-white shadow-sm">
+          {loading ? (
+            <p>Loading applications...</p>
+          ) : error ? null : applications.length === 0 ? (
+            <p>No applications yet. Add your first one to get started.</p>
+          ) : (
+            <table className="w-full border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-white/30">
+                  <th className="py-2 pr-4 font-medium">Title</th>
+                  <th className="py-2 pr-4 font-medium">Company</th>
+                  <th className="py-2 pr-4 font-medium">Recruiter</th>
+                  <th className="py-2 pr-4 font-medium">Source Website</th>
+                  <th className="py-2 pr-4 font-medium">Status</th>
+                  <th className="py-2 pr-4 font-medium">Applied on</th>
+                  <th className="py-2 font-medium">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {applications.map((application) => (
+                  <tr key={application.id} className="border-b border-white/20">
+                    <td className="py-3 pr-4">{application.title}</td>
+                    <td className="py-3 pr-4">{application.company}</td>
+                    <td className="py-3 pr-4">{application.recruiter ? application.recruiter : 'N/A'}</td>
+                    <td className="py-3 pr-4">{application.sourceWebsite ? application.sourceWebsite : 'N/A'}</td>
+                    <td className="py-3 pr-4">
+                      <StatusSelect application={application} onChange={handleStatusChange} />
+                    </td>
+                    <td className="py-3 pr-4">{application.appliedOn ?? '—'}</td>
+                    <td className="py-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditing(application)}
+                        className="mr-3 font-medium text-white hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(application)}
+                        className="font-medium text-red-200 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
       {editing && (

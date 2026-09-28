@@ -34,7 +34,7 @@ function StatusSelect({ application, onChange }: StatusSelectProps) {
         value={application.status}
         onChange={handleChange}
         disabled={saving}
-        className="rounded-lg border border-slate-300 px-2 py-1 text-sm capitalize focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200 disabled:opacity-60"
+        className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 capitalize focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200 disabled:opacity-60"
       >
         {STATUSES.map((status) => (
           <option key={status} value={status} className="capitalize">
