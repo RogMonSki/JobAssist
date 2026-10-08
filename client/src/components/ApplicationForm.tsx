@@ -133,7 +133,13 @@ function ApplicationForm({ initial, onSaved }: ApplicationFormProps) {
         id="appliedOn"
         type="date"
         value={appliedOn ?? ''}
-        onChange={(event) => setAppliedOn(event.target.value)}
+        onChange={(event) => {
+          const date = event.target.value
+          setAppliedOn(date)
+          if (date !== '') {
+            setStatus((current) => (current === 'saved' ? 'applied' : current))
+          }
+        }}
         className={inputClasses}
       />
 
