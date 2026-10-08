@@ -1,12 +1,16 @@
 import express from 'express'
+import rateLimit from 'express-rate-limit'
 import pool, { withTransaction } from '../db.js'
 import requireAuth from '../middleware/requireAuth.js'
+import { analyseJobDescription, type JdExtraction } from '../llm.js'
 
 const router = express.Router()
 router.use(requireAuth)
 
 const STATUSES = ['saved', 'applied', 'interview', 'offer', 'rejected'] as const
 type Status = (typeof STATUSES)[number]
+
+type ExtractionStatus = 'not_attempted' | 'success' | 'failed'
 
 interface ApplicationRow {
   id: number
@@ -17,7 +21,9 @@ interface ApplicationRow {
   source_website: string | null
   status: Status
   applied_on: string | null
-  extraction_status: string
+  extraction_status: ExtractionStatus
+  job_description: string | null
+  jd_extraction: JdExtraction | null
   created_at: string
   updated_at: string
 }
@@ -30,7 +36,9 @@ interface PublicApplication {
   sourceWebsite: string | null
   status: Status
   appliedOn: string | null
-  extractionStatus: string
+  extractionStatus: ExtractionStatus
+  jobDescription: string | null
+  jdExtraction: JdExtraction | null
   createdAt: string
   updatedAt: string
 }
@@ -45,6 +53,8 @@ function toPublicApplication(row: ApplicationRow): PublicApplication {
     status: row.status,
     appliedOn: row.applied_on,
     extractionStatus: row.extraction_status,
+    jobDescription: row.job_description,
+    jdExtraction: row.jd_extraction,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -258,6 +268,83 @@ router.patch('/:id', async (req, res) => {
     }
     console.error(err)
     res.status(500).json({ message: 'Could not update application' })
+  }
+})
+
+const MAX_JOB_DESCRIPTION_LENGTH = 20000
+
+const extractionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  keyGenerator: (req) => String(req.userId),
+  message: { message: 'Too many extraction requests. Try again later.' },
+})
+
+router.use('/:id/job-description', extractionLimiter)
+
+router.put('/:id/job-description', async (req, res) => {
+  const id = parseId(req.params.id)
+  if (id === null) {
+    return res.status(404).json({ message: 'Application not found' })
+  }
+
+  const body: unknown = req.body
+  if (typeof body !== 'object' || body === null || !('jobDescription' in body)) {
+    return res.status(400).json({ message: 'jobDescription is required' })
+  }
+  const raw = body.jobDescription
+  if (raw !== null && typeof raw !== 'string') {
+    return res.status(400).json({ message: 'Job description must be a string or null' })
+  }
+  const text = raw === null || raw.trim() === '' ? null : raw.trim()
+  if (text !== null && text.length > MAX_JOB_DESCRIPTION_LENGTH) {
+    return res
+      .status(400)
+      .json({ message: `Job description must be at most ${MAX_JOB_DESCRIPTION_LENGTH} characters` })
+  }
+
+  try {
+    const currentResult = await pool.query<ApplicationRow>(
+      'SELECT * FROM applications WHERE id = $1 AND user_id = $2',
+      [id, req.userId]
+    )
+    const current = currentResult.rows[0]
+    if (!current) {
+      return res.status(404).json({ message: 'Application not found' })
+    }
+
+    const unchanged = text === current.job_description
+    if (unchanged && (text === null || current.extraction_status === 'success')) {
+      return res.json(toPublicApplication(current))
+    }
+
+    let extraction: JdExtraction | null = null
+    let extractionStatus: ExtractionStatus = 'not_attempted'
+    if (text !== null) {
+      try {
+        extraction = await analyseJobDescription(text)
+        extractionStatus = 'success'
+      } catch (err) {
+        console.error('Job description extraction failed', err)
+        extractionStatus = 'failed'
+      }
+    }
+
+    const updateResult = await pool.query<ApplicationRow>(
+      `UPDATE applications
+       SET job_description = $1, jd_extraction = $2, extraction_status = $3, updated_at = NOW()
+       WHERE id = $4 AND user_id = $5
+       RETURNING *`,
+      [text, extraction, extractionStatus, id, req.userId]
+    )
+    const row = updateResult.rows[0]
+    if (!row) {
+      return res.status(404).json({ message: 'Application not found' })
+    }
+    res.json(toPublicApplication(row))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Could not save job description' })
   }
 })
 

@@ -17,6 +17,15 @@ export interface SignupFields {
 export const STATUSES = ['saved', 'applied', 'interview', 'offer', 'rejected'] as const
 export type ApplicationStatus = (typeof STATUSES)[number]
 
+export type ExtractionStatus = 'not_attempted' | 'success' | 'failed'
+
+export interface JdExtraction {
+  requiredSkills: string[]
+  niceToHaveSkills: string[]
+  minYearsExperience: number | null
+  experienceRequirements: string[]
+}
+
 export interface Application {
   id: number
   title: string
@@ -25,7 +34,9 @@ export interface Application {
   sourceWebsite: string | null
   status: ApplicationStatus
   appliedOn: string | null
-  extractionStatus: string
+  extractionStatus: ExtractionStatus
+  jobDescription: string | null
+  jdExtraction: JdExtraction | null
   createdAt: string
   updatedAt: string
 }

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict G3zQGYryuBhbRsoFSEy5m7AlSwlHK0QVBsiiDwGBnzQuIE9CIPyvbEob7u2tqfs
+\restrict YeWeyQXCdcSqiIwzWMD2qa1v85JKYcSZy1dSOqd1HsxZU2GU7ntnz4kQMunf32p
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -39,6 +39,8 @@ CREATE TABLE public.applications (
     extraction_status text DEFAULT 'not_attempted'::text NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    job_description text,
+    jd_extraction jsonb,
     CONSTRAINT extraction_status_values CHECK ((extraction_status = ANY (ARRAY['not_attempted'::text, 'success'::text, 'failed'::text]))),
     CONSTRAINT status_values CHECK ((status = ANY (ARRAY['saved'::text, 'applied'::text, 'interview'::text, 'offer'::text, 'rejected'::text])))
 );
@@ -226,5 +228,5 @@ ALTER TABLE ONLY public.status_history
 -- PostgreSQL database dump complete
 --
 
-\unrestrict G3zQGYryuBhbRsoFSEy5m7AlSwlHK0QVBsiiDwGBnzQuIE9CIPyvbEob7u2tqfs
+\unrestrict YeWeyQXCdcSqiIwzWMD2qa1v85JKYcSZy1dSOqd1HsxZU2GU7ntnz4kQMunf32p
 

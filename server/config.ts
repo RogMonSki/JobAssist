@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-const REQUIRED_ENV_VARS = ['DATABASE_URL', 'JWT_SECRET']
+const REQUIRED_ENV_VARS = ['DATABASE_URL', 'JWT_SECRET', 'GROQ_API_KEY']
 
 const missing = REQUIRED_ENV_VARS.filter((name) => !process.env[name])
 
@@ -22,5 +22,6 @@ export default {
   port: process.env.PORT || 3001,
   databaseUrl: requireEnv('DATABASE_URL'),
   jwtSecret: requireEnv('JWT_SECRET'),
+  groqApiKey: requireEnv('GROQ_API_KEY'),
   isProd: process.env.NODE_ENV === 'production',
 }

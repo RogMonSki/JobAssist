@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import Modal from '../components/Modal'
 import ApplicationForm from '../components/ApplicationForm'
 import StatusSelect from '../components/StatusSelect'
+import JobDescriptionPanel from '../components/JobDescriptionPanel'
 import { apiRequest } from '../api'
 import { useAuth } from '../context/useAuth'
 import type { Application } from '../types'
@@ -13,6 +14,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<Application | 'new' | null>(null)
+  const [expandedId, setExpandedId] = useState<number | null>(null)
 
   useEffect(() => {
     apiRequest<Application[]>('/api/applications')
@@ -36,7 +38,7 @@ function Dashboard() {
     setEditing(null)
   }
 
-  function handleStatusChange(application: Application) {
+  function handleApplicationUpdated(application: Application) {
     setApplications((current) => upsertByUpdatedAt(current, application))
   }
 
@@ -47,6 +49,7 @@ function Dashboard() {
     try {
       await apiRequest(`/api/applications/${application.id}`, { method: 'DELETE' })
       setApplications((current) => current.filter((a) => a.id !== application.id))
+      setExpandedId((current) => (current === application.id ? null : current))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not delete application')
     }
@@ -81,6 +84,9 @@ function Dashboard() {
             <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-white/30">
+                  <th className="w-8 py-2 pr-2">
+                    <span className="sr-only">Details</span>
+                  </th>
                   <th className="py-2 pr-4 font-medium">Title</th>
                   <th className="py-2 pr-4 font-medium">Company</th>
                   <th className="py-2 pr-4 font-medium">Recruiter</th>
@@ -91,34 +97,60 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {applications.map((application) => (
-                  <tr key={application.id} className="border-b border-white/20">
-                    <td className="py-3 pr-4">{application.title}</td>
-                    <td className="py-3 pr-4">{application.company}</td>
-                    <td className="py-3 pr-4">{application.recruiter ? application.recruiter : 'N/A'}</td>
-                    <td className="py-3 pr-4">{application.sourceWebsite ? application.sourceWebsite : 'N/A'}</td>
-                    <td className="py-3 pr-4">
-                      <StatusSelect application={application} onChange={handleStatusChange} />
-                    </td>
-                    <td className="py-3 pr-4">{application.appliedOn ?? '—'}</td>
-                    <td className="py-3">
-                      <button
-                        type="button"
-                        onClick={() => setEditing(application)}
-                        className="mr-3 font-medium text-white hover:underline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(application)}
-                        className="font-medium text-red-200 hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {applications.map((application) => {
+                  const expanded = expandedId === application.id
+                  return (
+                    <Fragment key={application.id}>
+                      <tr className="border-b border-white/20">
+                        <td className="py-3 pr-2">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedId(expanded ? null : application.id)}
+                            aria-expanded={expanded}
+                            aria-label={`${expanded ? 'Hide' : 'Show'} job description for ${application.title}`}
+                            className="w-6 font-medium text-white hover:opacity-80"
+                          >
+                            {expanded ? '▾' : '▸'}
+                          </button>
+                        </td>
+                        <td className="py-3 pr-4">{application.title}</td>
+                        <td className="py-3 pr-4">{application.company}</td>
+                        <td className="py-3 pr-4">{application.recruiter ? application.recruiter : 'N/A'}</td>
+                        <td className="py-3 pr-4">{application.sourceWebsite ? application.sourceWebsite : 'N/A'}</td>
+                        <td className="py-3 pr-4">
+                          <StatusSelect application={application} onChange={handleApplicationUpdated} />
+                        </td>
+                        <td className="py-3 pr-4">{application.appliedOn ?? '—'}</td>
+                        <td className="py-3">
+                          <button
+                            type="button"
+                            onClick={() => setEditing(application)}
+                            className="mr-3 font-medium text-white hover:underline"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(application)}
+                            className="font-medium text-red-200 hover:underline"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                      {expanded && (
+                        <tr className="border-b border-white/20">
+                          <td colSpan={8} className="pb-4 pl-8">
+                            <JobDescriptionPanel
+                              application={application}
+                              onChange={handleApplicationUpdated}
+                            />
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  )
+                })}
               </tbody>
             </table>
           )}
