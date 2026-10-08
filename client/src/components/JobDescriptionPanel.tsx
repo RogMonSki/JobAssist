@@ -33,18 +33,7 @@ function JobDescriptionPanel({ application, onChange }: JobDescriptionPanelProps
   return (
     <div className="space-y-4 py-2">
       <div>
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Job description</h3>
-          {!editing && (
-            <button
-              type="button"
-              onClick={() => setDraft(application.jobDescription ?? '')}
-              className="font-medium text-white hover:underline"
-            >
-              {application.jobDescription ? 'Edit job description' : 'Add job description'}
-            </button>
-          )}
-        </div>
+        <h3 className="font-semibold">Job description</h3>
 
         {editing ? (
           <div className="mt-2">
@@ -77,7 +66,7 @@ function JobDescriptionPanel({ application, onChange }: JobDescriptionPanelProps
             </div>
           </div>
         ) : application.jobDescription ? (
-          <p className="mt-2 max-h-48 overflow-y-auto rounded-lg bg-white/10 p-3 text-sm whitespace-pre-wrap">
+          <p className="mt-2 max-h-48 overflow-y-auto rounded-lg bg-black/25 p-3 text-sm whitespace-pre-wrap">
             {application.jobDescription}
           </p>
         ) : (
@@ -102,11 +91,21 @@ function JobDescriptionPanel({ application, onChange }: JobDescriptionPanelProps
         </p>
       )}
 
+      {!editing && (
+        <button
+          type="button"
+          onClick={() => setDraft(application.jobDescription ?? '')}
+          className="rounded-lg bg-white px-4 py-1.5 font-semibold text-teal-700 hover:bg-white/90"
+        >
+          {application.jobDescription ? 'Edit job description' : 'Add job description'}
+        </button>
+      )}
+
       {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
       <div>
         <h3 className="font-semibold">Debug: extracted JSON</h3>
-        <pre className="mt-2 max-h-64 overflow-auto rounded-lg bg-black/25 p-3 text-xs">
+        <pre className="mt-2 max-h-64 overflow-auto rounded-lg bg-black/50 p-3 text-xs">
           {JSON.stringify(application.jdExtraction, null, 2)}
         </pre>
       </div>
