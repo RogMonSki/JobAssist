@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit'
 import pool, { withTransaction } from '../db.js'
 import requireAuth from '../middleware/requireAuth.js'
 import { analyseJobDescription, type JdExtraction } from '../llm.js'
+import { parseId } from './params.js'
 
 const router = express.Router()
 router.use(requireAuth)
@@ -58,12 +59,6 @@ function toPublicApplication(row: ApplicationRow): PublicApplication {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
-}
-
-const ID_PATTERN = /^[1-9]\d*$/
-
-function parseId(raw: string): number | null {
-  return ID_PATTERN.test(raw) ? Number(raw) : null
 }
 
 interface ApplicationInput {

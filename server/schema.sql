@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict YeWeyQXCdcSqiIwzWMD2qa1v85JKYcSZy1dSOqd1HsxZU2GU7ntnz4kQMunf32p
+\restrict hOuLe6N4qmFLNbW8XUesjhcfjEDc24PegQT9wotjc0QpJcscFl8Xuza7z05fL9E
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -64,6 +64,45 @@ CREATE SEQUENCE public.applications_id_seq
 --
 
 ALTER SEQUENCE public.applications_id_seq OWNED BY public.applications.id;
+
+
+--
+-- Name: cvs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.cvs (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    file_name text NOT NULL,
+    mime_type text NOT NULL,
+    size_bytes integer NOT NULL,
+    file_data bytea NOT NULL,
+    extracted_text text,
+    text_extraction_status text NOT NULL,
+    uploaded_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT cvs_mime_type_values CHECK ((mime_type = ANY (ARRAY['application/pdf'::text, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'::text, 'text/plain'::text]))),
+    CONSTRAINT cvs_text_extraction_status_values CHECK ((text_extraction_status = ANY (ARRAY['success'::text, 'failed'::text])))
+);
+
+
+--
+-- Name: cvs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.cvs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: cvs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.cvs_id_seq OWNED BY public.cvs.id;
 
 
 --
@@ -143,6 +182,13 @@ ALTER TABLE ONLY public.applications ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
+-- Name: cvs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cvs ALTER COLUMN id SET DEFAULT nextval('public.cvs_id_seq'::regclass);
+
+
+--
 -- Name: status_history id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -162,6 +208,14 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.applications
     ADD CONSTRAINT applications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: cvs cvs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cvs
+    ADD CONSTRAINT cvs_pkey PRIMARY KEY (id);
 
 
 --
@@ -185,6 +239,13 @@ ALTER TABLE ONLY public.users
 --
 
 CREATE INDEX applications_user_id_idx ON public.applications USING btree (user_id);
+
+
+--
+-- Name: cvs_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX cvs_user_id_idx ON public.cvs USING btree (user_id);
 
 
 --
@@ -217,6 +278,14 @@ ALTER TABLE ONLY public.applications
 
 
 --
+-- Name: cvs cvs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cvs
+    ADD CONSTRAINT cvs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: status_history status_history_application_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -228,5 +297,5 @@ ALTER TABLE ONLY public.status_history
 -- PostgreSQL database dump complete
 --
 
-\unrestrict YeWeyQXCdcSqiIwzWMD2qa1v85JKYcSZy1dSOqd1HsxZU2GU7ntnz4kQMunf32p
+\unrestrict hOuLe6N4qmFLNbW8XUesjhcfjEDc24PegQT9wotjc0QpJcscFl8Xuza7z05fL9E
 

@@ -4,6 +4,7 @@ import Modal from '../components/Modal'
 import ApplicationForm from '../components/ApplicationForm'
 import StatusSelect from '../components/StatusSelect'
 import JobDescriptionPanel from '../components/JobDescriptionPanel'
+import CvBar from '../components/CvBar'
 import { apiRequest } from '../api'
 import { useAuth } from '../context/useAuth'
 import type { Application } from '../types'
@@ -60,8 +61,11 @@ function Dashboard() {
       <Navbar />
 
       <div className="p-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">{user ? `Hi, ${user.firstName}` : 'Dashboard'}</h1>
+        <h1 className="text-3xl font-bold">{user ? `Hi, ${user.firstName}` : 'Dashboard'}</h1>
+
+        <CvBar />
+
+        <div className="mt-6 flex justify-end">
           <button
             type="button"
             onClick={() => setEditing('new')}

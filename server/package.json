@@ -27,8 +27,11 @@
     "express-rate-limit": "^8.7.0",
     "groq-sdk": "^1.6.0",
     "jsonwebtoken": "^9.0.3",
+    "mammoth": "^1.13.0",
+    "multer": "^2.4.0",
     "node-pg-migrate": "^9.0.0",
-    "pg": "^8.23.0"
+    "pg": "^8.23.0",
+    "unpdf": "^1.8.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -36,6 +39,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.3.0",
     "@types/node": "^26.6.2",
     "@types/pg": "^8.23.1",
     "tsx": "^4.23.15",

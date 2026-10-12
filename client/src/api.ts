@@ -3,9 +3,10 @@ interface ErrorResponse {
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const headers = options.body instanceof FormData ? undefined : { 'Content-Type': 'application/json' }
   const res = await fetch(path, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options,
   })
 

@@ -4,9 +4,15 @@ interface ModalProps {
   title: string
   onClose: () => void
   children: ReactNode
+  size?: 'md' | 'xl'
 }
 
-function Modal({ title, onClose, children }: ModalProps) {
+const SIZE_CLASSES = {
+  md: 'max-w-md',
+  xl: 'max-w-4xl max-h-[90vh] overflow-y-auto',
+}
+
+function Modal({ title, onClose, children, size = 'md' }: ModalProps) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -23,7 +29,7 @@ function Modal({ title, onClose, children }: ModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg"
+        className={`w-full ${SIZE_CLASSES[size]} rounded-xl bg-white p-6 shadow-lg`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between">
