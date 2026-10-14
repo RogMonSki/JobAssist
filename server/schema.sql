@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict hOuLe6N4qmFLNbW8XUesjhcfjEDc24PegQT9wotjc0QpJcscFl8Xuza7z05fL9E
+\restrict hb9aRH3v6mMYV4vg64pWLE0dR6QSttEi7lK1lZYjygqGGA7o3MnF47XwzEbzWhW
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -80,7 +80,11 @@ CREATE TABLE public.cvs (
     extracted_text text,
     text_extraction_status text NOT NULL,
     uploaded_at timestamp with time zone DEFAULT now() NOT NULL,
+    is_primary boolean DEFAULT false NOT NULL,
+    skills_extraction jsonb,
+    skills_extraction_status text DEFAULT 'not_attempted'::text NOT NULL,
     CONSTRAINT cvs_mime_type_values CHECK ((mime_type = ANY (ARRAY['application/pdf'::text, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'::text, 'text/plain'::text]))),
+    CONSTRAINT cvs_skills_extraction_status_values CHECK ((skills_extraction_status = ANY (ARRAY['not_attempted'::text, 'success'::text, 'failed'::text]))),
     CONSTRAINT cvs_text_extraction_status_values CHECK ((text_extraction_status = ANY (ARRAY['success'::text, 'failed'::text])))
 );
 
@@ -242,6 +246,13 @@ CREATE INDEX applications_user_id_idx ON public.applications USING btree (user_i
 
 
 --
+-- Name: cvs_one_primary_per_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX cvs_one_primary_per_user ON public.cvs USING btree (user_id) WHERE is_primary;
+
+
+--
 -- Name: cvs_user_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -297,5 +308,5 @@ ALTER TABLE ONLY public.status_history
 -- PostgreSQL database dump complete
 --
 
-\unrestrict hOuLe6N4qmFLNbW8XUesjhcfjEDc24PegQT9wotjc0QpJcscFl8Xuza7z05fL9E
+\unrestrict hb9aRH3v6mMYV4vg64pWLE0dR6QSttEi7lK1lZYjygqGGA7o3MnF47XwzEbzWhW
 

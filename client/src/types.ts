@@ -46,6 +46,11 @@ export type CvMimeType =
   | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   | 'text/plain'
 
+export interface CvExtraction {
+  skills: string[]
+  totalYearsExperience: number | null
+}
+
 export interface Cv {
   id: number
   fileName: string
@@ -53,6 +58,9 @@ export interface Cv {
   sizeBytes: number
   textExtractionStatus: 'success' | 'failed'
   uploadedAt: string
+  isPrimary: boolean
+  skillsExtraction: CvExtraction | null
+  skillsExtractionStatus: ExtractionStatus
 }
 
 export interface ApplicationInput {

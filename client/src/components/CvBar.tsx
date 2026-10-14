@@ -16,8 +16,9 @@ function CvBar() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
-  const [selected, setSelected] = useState<Cv | null>(null)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const selected = cvs.find((cv) => cv.id === selectedId) ?? null
 
   useEffect(() => {
     apiRequest<Cv[]>('/api/cvs')
@@ -52,6 +53,8 @@ function CvBar() {
         setNotice(
           `"${cv.fileName}" was saved, but no text could be read from it. It may be a scanned image, so it can't be used for skill-gap analysis.`
         )
+      } else if (cv.skillsExtractionStatus === 'failed') {
+        setNotice(`"${cv.fileName}" was saved, but its skills couldn't be extracted. Open it to retry.`)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not upload CV')
@@ -60,9 +63,24 @@ function CvBar() {
     }
   }
 
-  function handleDeleted(id: number) {
-    setCvs((current) => current.filter((cv) => cv.id !== id))
-    setSelected(null)
+  function handleUpdated(updated: Cv) {
+    setCvs((current) =>
+      current.map((cv) => {
+        if (cv.id === updated.id) {
+          return updated
+        }
+        return updated.isPrimary ? { ...cv, isPrimary: false } : cv
+      })
+    )
+  }
+
+  async function handleDeleted() {
+    setSelectedId(null)
+    try {
+      setCvs(await apiRequest<Cv[]>('/api/cvs'))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not load CVs')
+    }
   }
 
   const atLimit = cvs.length >= MAX_CVS
@@ -82,7 +100,7 @@ function CvBar() {
               <button
                 key={cv.id}
                 type="button"
-                onClick={() => setSelected(cv)}
+                onClick={() => setSelectedId(cv.id)}
                 title={cv.fileName}
                 className="shrink-0 rounded-lg border border-teal-600/30 bg-white px-3 py-1.5 text-left shadow-sm hover:border-teal-600"
               >
@@ -91,6 +109,11 @@ function CvBar() {
                   {cv.textExtractionStatus === 'failed' && (
                     <span role="img" aria-label="Text could not be read" className="text-amber-600">
                       ⚠
+                    </span>
+                  )}
+                  {cv.isPrimary && (
+                    <span role="img" aria-label="Primary CV" className="text-amber-500">
+                      ★
                     </span>
                   )}
                 </span>
@@ -122,7 +145,12 @@ function CvBar() {
       {notice && <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{notice}</p>}
 
       {selected && (
-        <CvPreviewModal cv={selected} onClose={() => setSelected(null)} onDeleted={handleDeleted} />
+        <CvPreviewModal
+          cv={selected}
+          onClose={() => setSelectedId(null)}
+          onUpdated={handleUpdated}
+          onDeleted={handleDeleted}
+        />
       )}
     </div>
   )

@@ -1,7 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 
 interface ModalProps {
-  title: string
+  title: ReactNode
   onClose: () => void
   children: ReactNode
   size?: 'md' | 'xl'
@@ -33,7 +33,7 @@ function Modal({ title, onClose, children, size = 'md' }: ModalProps) {
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+          <h2 className="flex min-w-0 items-center gap-2 text-xl font-bold text-slate-900">{title}</h2>
           <button
             type="button"
             onClick={onClose}
