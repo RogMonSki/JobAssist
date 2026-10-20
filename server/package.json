@@ -5,15 +5,16 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "tsx --test",
     "dev": "tsx watch index.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "migrate": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "schema:dump": "tsx scripts/dumpSchema.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "skills:rebuild": "tsx scripts/rebuildSkills.ts"
   },
   "keywords": [],
   "author": "",

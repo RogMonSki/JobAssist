@@ -5,6 +5,7 @@ import type { PoolClient } from 'pg'
 import pool, { withTransaction } from '../db.js'
 import requireAuth from '../middleware/requireAuth.js'
 import { analyseCv, type CvExtraction } from '../llm.js'
+import { syncCvSkills } from '../skills.js'
 import {
   MAX_CV_BYTES,
   CvParseError,
@@ -165,7 +166,11 @@ router.post('/', uploadLimiter, upload.single('file'), async (req, res) => {
           MAX_CVS_PER_USER,
         ]
       )
-      return result.rows[0]
+      const inserted = result.rows[0]
+      if (inserted) {
+        await syncCvSkills(client, inserted.id, extraction)
+      }
+      return inserted
     })
     if (!row) {
       return res.status(409).json({ message: limitMessage })
@@ -251,13 +256,19 @@ router.post('/:id/extract-skills', async (req, res) => {
       skillsStatus = 'failed'
     }
 
-    const updated = await pool.query<CvRow>(
-      `UPDATE cvs SET skills_extraction = $1, skills_extraction_status = $2
-       WHERE id = $3 AND user_id = $4
-       RETURNING ${CV_COLUMNS}`,
-      [extraction, skillsStatus, id, req.userId]
-    )
-    const row = updated.rows[0]
+    const row = await withTransaction(async (client) => {
+      const updated = await client.query<CvRow>(
+        `UPDATE cvs SET skills_extraction = $1, skills_extraction_status = $2
+         WHERE id = $3 AND user_id = $4
+         RETURNING ${CV_COLUMNS}`,
+        [extraction, skillsStatus, id, req.userId]
+      )
+      const updatedCv = updated.rows[0]
+      if (updatedCv) {
+        await syncCvSkills(client, updatedCv.id, extraction)
+      }
+      return updatedCv
+    })
     if (!row) {
       return res.status(404).json({ message: 'CV not found' })
     }

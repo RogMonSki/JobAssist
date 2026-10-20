@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict hb9aRH3v6mMYV4vg64pWLE0dR6QSttEi7lK1lZYjygqGGA7o3MnF47XwzEbzWhW
+\restrict GnaA5HwnjT9NuopGmnRZtvTPElZUDvpTtCewEoaO74wkSrnigvr90msMLE0ONcq
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -22,6 +22,18 @@ SET row_security = off;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: application_skills; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.application_skills (
+    application_id integer NOT NULL,
+    skill_id integer NOT NULL,
+    importance text NOT NULL,
+    CONSTRAINT application_skills_importance_values CHECK ((importance = ANY (ARRAY['required'::text, 'nice_to_have'::text])))
+);
+
 
 --
 -- Name: applications; Type: TABLE; Schema: public; Owner: -
@@ -67,6 +79,54 @@ ALTER SEQUENCE public.applications_id_seq OWNED BY public.applications.id;
 
 
 --
+-- Name: cv_evaluations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.cv_evaluations (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    cv_id integer,
+    cv_file_name text NOT NULL,
+    tier text NOT NULL,
+    application_count integer NOT NULL,
+    skill_gap jsonb NOT NULL,
+    evaluation jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT cv_evaluations_tier_values CHECK ((tier = ANY (ARRAY['none'::text, 'limited'::text, 'full'::text])))
+);
+
+
+--
+-- Name: cv_evaluations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.cv_evaluations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: cv_evaluations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.cv_evaluations_id_seq OWNED BY public.cv_evaluations.id;
+
+
+--
+-- Name: cv_skills; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.cv_skills (
+    cv_id integer NOT NULL,
+    skill_id integer NOT NULL
+);
+
+
+--
 -- Name: cvs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -107,6 +167,37 @@ CREATE SEQUENCE public.cvs_id_seq
 --
 
 ALTER SEQUENCE public.cvs_id_seq OWNED BY public.cvs.id;
+
+
+--
+-- Name: skills; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.skills (
+    id integer NOT NULL,
+    key text NOT NULL,
+    canonical_name text NOT NULL
+);
+
+
+--
+-- Name: skills_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.skills_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: skills_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.skills_id_seq OWNED BY public.skills.id;
 
 
 --
@@ -186,10 +277,24 @@ ALTER TABLE ONLY public.applications ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
+-- Name: cv_evaluations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cv_evaluations ALTER COLUMN id SET DEFAULT nextval('public.cv_evaluations_id_seq'::regclass);
+
+
+--
 -- Name: cvs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.cvs ALTER COLUMN id SET DEFAULT nextval('public.cvs_id_seq'::regclass);
+
+
+--
+-- Name: skills id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.skills ALTER COLUMN id SET DEFAULT nextval('public.skills_id_seq'::regclass);
 
 
 --
@@ -207,6 +312,14 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 
 --
+-- Name: application_skills application_skills_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.application_skills
+    ADD CONSTRAINT application_skills_pkey PRIMARY KEY (application_id, skill_id);
+
+
+--
 -- Name: applications applications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -215,11 +328,43 @@ ALTER TABLE ONLY public.applications
 
 
 --
+-- Name: cv_evaluations cv_evaluations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cv_evaluations
+    ADD CONSTRAINT cv_evaluations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: cv_skills cv_skills_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cv_skills
+    ADD CONSTRAINT cv_skills_pkey PRIMARY KEY (cv_id, skill_id);
+
+
+--
 -- Name: cvs cvs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.cvs
     ADD CONSTRAINT cvs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: skills skills_key_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.skills
+    ADD CONSTRAINT skills_key_unique UNIQUE (key);
+
+
+--
+-- Name: skills skills_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.skills
+    ADD CONSTRAINT skills_pkey PRIMARY KEY (id);
 
 
 --
@@ -239,10 +384,31 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: application_skills_skill_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX application_skills_skill_id_idx ON public.application_skills USING btree (skill_id);
+
+
+--
 -- Name: applications_user_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX applications_user_id_idx ON public.applications USING btree (user_id);
+
+
+--
+-- Name: cv_evaluations_user_created_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX cv_evaluations_user_created_idx ON public.cv_evaluations USING btree (user_id, created_at DESC);
+
+
+--
+-- Name: cv_skills_skill_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX cv_skills_skill_id_idx ON public.cv_skills USING btree (skill_id);
 
 
 --
@@ -281,11 +447,59 @@ CREATE UNIQUE INDEX users_username_lower_idx ON public.users USING btree (lower(
 
 
 --
+-- Name: application_skills application_skills_application_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.application_skills
+    ADD CONSTRAINT application_skills_application_id_fkey FOREIGN KEY (application_id) REFERENCES public.applications(id) ON DELETE CASCADE;
+
+
+--
+-- Name: application_skills application_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.application_skills
+    ADD CONSTRAINT application_skills_skill_id_fkey FOREIGN KEY (skill_id) REFERENCES public.skills(id);
+
+
+--
 -- Name: applications applications_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.applications
     ADD CONSTRAINT applications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: cv_evaluations cv_evaluations_cv_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cv_evaluations
+    ADD CONSTRAINT cv_evaluations_cv_id_fkey FOREIGN KEY (cv_id) REFERENCES public.cvs(id) ON DELETE SET NULL;
+
+
+--
+-- Name: cv_evaluations cv_evaluations_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cv_evaluations
+    ADD CONSTRAINT cv_evaluations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: cv_skills cv_skills_cv_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cv_skills
+    ADD CONSTRAINT cv_skills_cv_id_fkey FOREIGN KEY (cv_id) REFERENCES public.cvs(id) ON DELETE CASCADE;
+
+
+--
+-- Name: cv_skills cv_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cv_skills
+    ADD CONSTRAINT cv_skills_skill_id_fkey FOREIGN KEY (skill_id) REFERENCES public.skills(id);
 
 
 --
@@ -308,5 +522,5 @@ ALTER TABLE ONLY public.status_history
 -- PostgreSQL database dump complete
 --
 
-\unrestrict hb9aRH3v6mMYV4vg64pWLE0dR6QSttEi7lK1lZYjygqGGA7o3MnF47XwzEbzWhW
+\unrestrict GnaA5HwnjT9NuopGmnRZtvTPElZUDvpTtCewEoaO74wkSrnigvr90msMLE0ONcq
 

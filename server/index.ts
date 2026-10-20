@@ -6,6 +6,7 @@ import healthRouter from './routes/health.js'
 import authRouter from './routes/auth.js'
 import applicationsRouter from './routes/applications.js'
 import cvsRouter from './routes/cvs.js'
+import evaluationsRouter from './routes/evaluations.js'
 
 const app = express()
 
@@ -17,5 +18,6 @@ app.use('/api', healthRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/applications', applicationsRouter)
 app.use('/api/cvs', cvsRouter)
+app.use('/api/evaluations', evaluationsRouter)
 
 app.listen(config.port, () => console.log(`Server running on port ${config.port}`))

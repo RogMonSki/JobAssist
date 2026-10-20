@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit'
 import pool, { withTransaction } from '../db.js'
 import requireAuth from '../middleware/requireAuth.js'
 import { analyseJobDescription, type JdExtraction } from '../llm.js'
+import { syncApplicationSkills } from '../skills.js'
 import { parseId } from './params.js'
 
 const router = express.Router()
@@ -325,14 +326,20 @@ router.put('/:id/job-description', async (req, res) => {
       }
     }
 
-    const updateResult = await pool.query<ApplicationRow>(
-      `UPDATE applications
-       SET job_description = $1, jd_extraction = $2, extraction_status = $3, updated_at = NOW()
-       WHERE id = $4 AND user_id = $5
-       RETURNING *`,
-      [text, extraction, extractionStatus, id, req.userId]
-    )
-    const row = updateResult.rows[0]
+    const row = await withTransaction(async (client) => {
+      const updateResult = await client.query<ApplicationRow>(
+        `UPDATE applications
+         SET job_description = $1, jd_extraction = $2, extraction_status = $3, updated_at = NOW()
+         WHERE id = $4 AND user_id = $5
+         RETURNING *`,
+        [text, extraction, extractionStatus, id, req.userId]
+      )
+      const updated = updateResult.rows[0]
+      if (updated) {
+        await syncApplicationSkills(client, updated.id, extraction)
+      }
+      return updated
+    })
     if (!row) {
       return res.status(404).json({ message: 'Application not found' })
     }
