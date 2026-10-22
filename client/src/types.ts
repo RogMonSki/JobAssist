@@ -63,6 +63,39 @@ export interface Cv {
   skillsExtractionStatus: ExtractionStatus
 }
 
+export type EvidenceTier = 'none' | 'limited' | 'full'
+
+export interface SkillGapRow {
+  name: string
+  applicationCount: number
+  requiredCount: number
+  inCv: boolean
+}
+
+export interface SkillGap {
+  applicationCount: number
+  tier: EvidenceTier
+  skills: SkillGapRow[]
+}
+
+export interface CvEvaluation {
+  summary: string
+  strengths: string[]
+  gaps: string[]
+  suggestions: string[]
+}
+
+export interface Evaluation {
+  id: number
+  cvId: number | null
+  cvFileName: string
+  tier: EvidenceTier
+  applicationCount: number
+  skillGap: SkillGap
+  evaluation: CvEvaluation
+  createdAt: string
+}
+
 export interface ApplicationInput {
   title: string
   company: string

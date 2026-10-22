@@ -227,7 +227,8 @@ const EVALUATION_RESPONSE_SCHEMA = {
 }
 
 function describeRequestedSkill(row: SkillGapRow, applicationCount: number): string {
-  return `- ${row.name} (requested by ${row.applicationCount} of ${applicationCount} applications, required in ${row.requiredCount})`
+  const applications = applicationCount === 1 ? 'application' : 'applications'
+  return `- ${row.name} (asked for in ${row.applicationCount} of ${applicationCount} ${applications}, required in ${row.requiredCount})`
 }
 
 function buildEvaluationMessage(input: CvEvaluationInput): string {

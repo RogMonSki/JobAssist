@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { apiRequest } from '../api'
 import CvPreviewModal from './CvPreviewModal'
 import type { Cv } from '../types'
@@ -122,6 +123,15 @@ function CvBar() {
             ))
           )}
         </div>
+
+        {cvs.length > 0 && (
+          <Link
+            to="/evaluate"
+            className="shrink-0 rounded-lg bg-linear-to-br from-cyan-500 to-teal-600 px-4 py-2 font-semibold text-white hover:opacity-90"
+          >
+            Evaluate my CV
+          </Link>
+        )}
 
         <input
           ref={fileInputRef}
