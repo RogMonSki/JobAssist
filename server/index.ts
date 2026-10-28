@@ -7,6 +7,7 @@ import authRouter from './routes/auth.js'
 import applicationsRouter from './routes/applications.js'
 import cvsRouter from './routes/cvs.js'
 import evaluationsRouter from './routes/evaluations.js'
+import statsRouter from './routes/stats.js'
 
 const app = express()
 
@@ -19,5 +20,6 @@ app.use('/api/auth', authRouter)
 app.use('/api/applications', applicationsRouter)
 app.use('/api/cvs', cvsRouter)
 app.use('/api/evaluations', evaluationsRouter)
+app.use('/api/stats', statsRouter)
 
 app.listen(config.port, () => console.log(`Server running on port ${config.port}`))
