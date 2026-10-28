@@ -96,6 +96,52 @@ export interface Evaluation {
   createdAt: string
 }
 
+export type PipelineStage = 'saved' | 'applied' | 'interview' | 'offer'
+export type TimedStage = 'saved' | 'applied' | 'interview'
+
+export interface StageTiming {
+  medianDays: number | null
+  sampleSize: number
+}
+
+export interface SkillFrequency {
+  name: string
+  requiredCount: number
+  niceToHaveCount: number
+}
+
+export interface SourceStats {
+  source: string | null
+  applications: number
+  applied: number
+  replied: number
+}
+
+export interface WeeklyCount {
+  weekStart: string
+  count: number
+}
+
+export interface ExperienceStats {
+  medianYears: number | null
+  minYears: number | null
+  maxYears: number | null
+  sampleSize: number
+}
+
+export interface Stats {
+  funnel: Record<PipelineStage, number>
+  dropOff: Record<PipelineStage, number>
+  stageDurations: Record<TimedStage, StageTiming>
+  awaitingReply: number
+  totals: { applications: number; applied: number; replied: number }
+  extractedApplications: number
+  skills: SkillFrequency[]
+  sources: SourceStats[]
+  weeklyApplications: WeeklyCount[]
+  experience: ExperienceStats
+}
+
 export interface ApplicationInput {
   title: string
   company: string
