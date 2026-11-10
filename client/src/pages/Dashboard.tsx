@@ -1,4 +1,5 @@
 import { Fragment, lazy, Suspense, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Modal from '../components/Modal'
 import ApplicationForm from '../components/ApplicationForm'
@@ -18,6 +19,7 @@ function Dashboard() {
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<Application | 'new' | null>(null)
   const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [prepCount, setPrepCount] = useState(0)
 
   useEffect(() => {
     apiRequest<Application[]>('/api/applications')
@@ -27,6 +29,14 @@ function Dashboard() {
       })
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    apiRequest<{ count: number }>('/api/interview-preps/count')
+      .then((result) => setPrepCount(result.count))
+      .catch((err: unknown) => console.error(err))
+  }, [])
+
+  const showInterviewPrep = prepCount > 0 || applications.some((application) => application.status === 'interview')
 
   function upsertByUpdatedAt(current: Application[], application: Application): Application[] {
     const exists = current.some((a) => a.id === application.id)
@@ -67,7 +77,15 @@ function Dashboard() {
 
         <CvBar />
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex justify-end gap-3">
+          {showInterviewPrep && (
+            <Link
+              to="/interview-prep"
+              className="rounded-lg border border-teal-600 px-4 py-2 font-semibold text-teal-700 hover:bg-teal-50"
+            >
+              Interview prep
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setEditing('new')}

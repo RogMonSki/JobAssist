@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict GnaA5HwnjT9NuopGmnRZtvTPElZUDvpTtCewEoaO74wkSrnigvr90msMLE0ONcq
+\restrict 0hJh17M2nOjwdsj3VCdUOiRzCasvXZ8arEBUCirt7mhrCNlYqoZTQVVfCU6xc4a
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -170,6 +170,41 @@ ALTER SEQUENCE public.cvs_id_seq OWNED BY public.cvs.id;
 
 
 --
+-- Name: interview_preps; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.interview_preps (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    application_id integer,
+    job_title text NOT NULL,
+    company text NOT NULL,
+    guidance jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: interview_preps_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.interview_preps_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: interview_preps_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.interview_preps_id_seq OWNED BY public.interview_preps.id;
+
+
+--
 -- Name: skills; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -291,6 +326,13 @@ ALTER TABLE ONLY public.cvs ALTER COLUMN id SET DEFAULT nextval('public.cvs_id_s
 
 
 --
+-- Name: interview_preps id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.interview_preps ALTER COLUMN id SET DEFAULT nextval('public.interview_preps_id_seq'::regclass);
+
+
+--
 -- Name: skills id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -349,6 +391,14 @@ ALTER TABLE ONLY public.cv_skills
 
 ALTER TABLE ONLY public.cvs
     ADD CONSTRAINT cvs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: interview_preps interview_preps_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.interview_preps
+    ADD CONSTRAINT interview_preps_pkey PRIMARY KEY (id);
 
 
 --
@@ -423,6 +473,13 @@ CREATE UNIQUE INDEX cvs_one_primary_per_user ON public.cvs USING btree (user_id)
 --
 
 CREATE INDEX cvs_user_id_idx ON public.cvs USING btree (user_id);
+
+
+--
+-- Name: interview_preps_user_created_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX interview_preps_user_created_idx ON public.interview_preps USING btree (user_id, created_at DESC);
 
 
 --
@@ -511,6 +568,22 @@ ALTER TABLE ONLY public.cvs
 
 
 --
+-- Name: interview_preps interview_preps_application_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.interview_preps
+    ADD CONSTRAINT interview_preps_application_id_fkey FOREIGN KEY (application_id) REFERENCES public.applications(id) ON DELETE SET NULL;
+
+
+--
+-- Name: interview_preps interview_preps_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.interview_preps
+    ADD CONSTRAINT interview_preps_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: status_history status_history_application_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -522,5 +595,5 @@ ALTER TABLE ONLY public.status_history
 -- PostgreSQL database dump complete
 --
 
-\unrestrict GnaA5HwnjT9NuopGmnRZtvTPElZUDvpTtCewEoaO74wkSrnigvr90msMLE0ONcq
+\unrestrict 0hJh17M2nOjwdsj3VCdUOiRzCasvXZ8arEBUCirt7mhrCNlYqoZTQVVfCU6xc4a
 

@@ -96,6 +96,29 @@ export interface Evaluation {
   createdAt: string
 }
 
+export interface InterviewStage {
+  name: string
+  whatToExpect: string
+  howToPrepare: string[]
+  likelyQuestions: string[]
+}
+
+export interface InterviewGuidance {
+  summary: string
+  stagesFromJobDescription: boolean
+  stages: InterviewStage[]
+  questionsToAsk: string[]
+}
+
+export interface InterviewPrep {
+  id: number
+  applicationId: number | null
+  jobTitle: string
+  company: string
+  guidance: InterviewGuidance
+  createdAt: string
+}
+
 export type PipelineStage = 'saved' | 'applied' | 'interview' | 'offer'
 export type TimedStage = 'saved' | 'applied' | 'interview'
 

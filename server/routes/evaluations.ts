@@ -4,7 +4,7 @@ import pool from '../db.js'
 import requireAuth from '../middleware/requireAuth.js'
 import { evaluateCv, type CvEvaluation } from '../llm.js'
 import { getSkillGap, type EvidenceTier, type SkillGap } from '../skillGap.js'
-import { parseId } from './params.js'
+import { parseIdValue } from './params.js'
 
 const router = express.Router()
 router.use(requireAuth)
@@ -49,13 +49,6 @@ function toPublicEvaluation(row: EvaluationRow): PublicEvaluation {
   }
 }
 
-function parseCvId(value: unknown): number | null {
-  if (typeof value === 'number') {
-    return parseId(String(value))
-  }
-  return typeof value === 'string' ? parseId(value) : null
-}
-
 const evaluationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -80,7 +73,7 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/skill-gap', async (req, res) => {
-  const cvId = parseCvId(req.query.cvId)
+  const cvId = parseIdValue(req.query.cvId)
   if (cvId === null || req.userId === undefined) {
     return res.status(404).json({ message: 'CV not found' })
   }
@@ -99,7 +92,7 @@ router.get('/skill-gap', async (req, res) => {
 
 router.post('/', evaluationLimiter, async (req, res) => {
   const body: unknown = req.body
-  const cvId = typeof body === 'object' && body !== null && 'cvId' in body ? parseCvId(body.cvId) : null
+  const cvId = typeof body === 'object' && body !== null && 'cvId' in body ? parseIdValue(body.cvId) : null
   if (cvId === null || req.userId === undefined) {
     return res.status(404).json({ message: 'CV not found' })
   }
